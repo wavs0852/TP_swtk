@@ -1,0 +1,72 @@
+#1. 교수와 수업 이름을 csv파일로 입력받게 만들기
+#2. csv파일을 판다스 데이터프레임 형식으로 변환하여 3자리 수의 일련번호를 부과하기 
+# 일련번호 예시 : lst_lec = ['P' + str(i + 1) + s for i in range(6) for s in ['A', 'B']]
+#3. 코드의 출력부(판다스)를 tkinter를 사용하여 GUI로 만들기
+
+import random
+import pandas as pd
+
+# 일련번호 영역 (수정요청) / 요청사항 : CSV 읽기 > 판다스 > 일련번호 생성
+
+#해야할일 일단 아래꺼 csv로 만드는게 아니라 받아서 열기 <<일단은 열기는 성공
+#받은거에서 원하는 교수마다 값 지정후 조건 달아주기
+#
+
+#lst_lec = ['P' + str(i + 1) + s for i in range(6) for s in ['A', 'B']] #<<csv로 만들기
+lst_prf = ['확률과통계/고선우', '딥러닝/고선우', 'AI알고리즘/권수태', '기계학습/권수태', 'AI수학/민정익', '논리적문제해결/민정익', '인공지능기초/이근호', '서비스러닝/이근호', '논리적문제해결/송주환', '영상이해/송주환', 'AI프로그래밍/김영수', '리눅스운영체제/김영수']
+dct_lec = dict(zip(lst_lec, lst_prf))|{'JOB':'진로탐색', 'BOB':'점심시간'}
+
+#csv파일의 경로를 입력받아 파일을 읽는 코드(일단 임시 여차할시 지워버릴것)
+file = input("CSV 파일의 경로를 입력(csv형식 파일만 넣을것)")  # 파일 경로와 이름 입력
+def read_csv(file):
+    try:
+        data = pd.read_csv(file)
+        if data is not None:
+            print(data)#파일을 읽었을때 파일을 출력해줌
+        else:
+            print("파일을 읽는 중 오류 발생")#실패시 출력(지워도 되나? 싶은데 있는게 더 안정적인듯)
+    except FileNotFoundError: # FileNotFoundError >> 예외처리중 파일을 찾을 수 없을때
+        print("파일을 찾을 수 없음")
+    except Exception as e: ## 예외처리중 파일을 찾을 수 없을때 예외객체를 e에 할당해서 예외의 정보를 읽을 수 있음
+        print("파일을 읽는 중 오류가 발생", str(e))
+
+read_csv(file)
+# 메인 알고리즘
+def search(lst_s):
+    dummy, flag = '000', False
+    for value in lst_s:
+        if value[1] == dummy[1]:
+            flag = True
+        dummy = value
+    return flag
+
+def mktable(lst_f):
+    while True:
+        lst_lecture = lst_f * 2
+        choose = random.sample(lst_lecture, len(lst_lecture))
+        if ((len(set(choose[0:10])) == 10) and (len(set(choose[5:14])) == 9) and (len(set(choose[10:19])) == 9) and (len(set(choose[14:24])) == 10) and (len(set([i[1] for i in choose[0:5]])) >= 4) and (len(set([i[1] for i in choose[5:10]])) >= 4) and (len(set([i[1] for i in choose[10:14]])) >= 3) and (len(set([i[1] for i in choose[14:19]])) >= 4) and (len(set([i[1] for i in choose[19:24]])) >= 4)):
+            chosen = [choose[0:5], choose[5:10], choose[10:14], choose[14:19], choose[19:24]]
+            for i in range(len(chosen)):
+                while search(chosen[i]) == True:
+                    chosen[i] = random.sample(chosen[i], len(chosen[i]))
+                chosen[i].insert(2, 'BOB')
+            chosen[2].append('JOB')
+            break
+    return chosen
+
+# 판다스 영역 (수정요청) / 요청사항 : Tkinter로 GUI화
+
+def mkpandas(lst_t, dct):
+    for y in range(len(lst_t)):
+        for x in range(len(lst_t[y])):
+            lst_t[y][x] = dct[lst_t[y][x]]
+    result = pd.DataFrame(lst_t, index=['월','화','수','목','금'], columns=['09:00','10:30','12:00','01:00','02:30','04:00'])
+    return result
+
+
+# 코드 실행 영역
+if __name__ == "__main__":
+    table = mktable(lst_lec)
+    data = mkpandas(table, dct_lec)
+
+data.T
