@@ -13,3 +13,4 @@ def read_csv(file):
         print("파일을 읽는 중 오류가 발생", str(e))
 
 read_csv(file)
+
